@@ -8,11 +8,10 @@ export default class TaskList extends HTMLElement {
         this._shadow = this.attachShadow({ mode: "closed" });
         this._createLink();
         this._createHTML();
-        this._loadTasks();
 
     }//Slutt constructor
 
-      _createLink() {
+    _createLink() {
         const link = document.createElement('link');
 
         const path = import.meta.url.match(/.*\//)[0];
@@ -41,19 +40,12 @@ export default class TaskList extends HTMLElement {
     }//Slutt createHTML
 
 
-    async _loadTasks() {
+    _createTasks(tasks, status) {
 
 
         try {
-
-            const root = this._shadow.getElementById("root");
-            const res = await fetch("Tasks.json");
             
-            const tasksJson = await res.text();
-            const tasks = JSON.parse(tasksJson);
-
-
-
+            const root = this._shadow.getElementById("root");
 
             const table = document.createElement("table");
             table.setAttribute("id", "task-list")
@@ -62,16 +54,16 @@ export default class TaskList extends HTMLElement {
 
                 let content = "<tr><th>Task</th><th>Status</th></tr>";
 
-                for (let i = 0; i < tasks.length; i++) {
+                for (let i = (tasks.length - 1); i >= 0; i--) {
                     content += `
                                 <tr class="tasks" id="${tasks[i].id}">
                                 <td>${tasks[i].title}</td>
                                 <td>${tasks[i].status}</td>
                                 <td><select>
                                 <option selected="selected">Modify</option>
-                                <option value="ACTIVE">ACTIVE</option>
-                                <option value="WAITING">WAITING</option>
-                                <option value="DONE">DONE</option>
+                                <option value=${status[0]}>${status[0]}</option>
+                                <option value=${status[1]}>${status[1]}</option>
+                                <option value=${status[2]}>${status[2]}</option>
                                 </select></td>
                                 <td><button class="btn-remove">Remove</button></td>
                                 </tr>`
@@ -79,8 +71,9 @@ export default class TaskList extends HTMLElement {
 
                 table.insertAdjacentHTML("beforeend", content);
                 root.firstElementChild.innerHTML = `Found ${tasks.length} tasks.`;
-
             }
+
+
             root.insertBefore(table, undefined);
 
             console.log("Fetched data");
@@ -91,6 +84,7 @@ export default class TaskList extends HTMLElement {
 
     }//Slutt loadTask
 
+   
 
     enableaddtask() {
 
@@ -164,6 +158,7 @@ export default class TaskList extends HTMLElement {
                         const status = task.children[2].firstElementChild.value;
 
                         if (status != "Modify" && window.confirm(`Set '${text}' to ${status} `)) {
+                            task.children[1].innerHTML = status;
                             callback(id, status);
                         };
 
@@ -264,6 +259,7 @@ export default class TaskList extends HTMLElement {
 
                 tasks.firstElementChild.firstElementChild.insertAdjacentHTML('afterend', content);
 
+
             } else {
 
                 setTimeout(() => {
@@ -308,7 +304,7 @@ export default class TaskList extends HTMLElement {
             if (connected != null) {
 
                 this._shadow.getElementById(id).remove();
-            } else { 
+            } else {
                 setTimeout(() => {
                     this.removeTask(id);
                 }, 100);

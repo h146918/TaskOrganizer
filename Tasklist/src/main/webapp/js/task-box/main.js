@@ -11,9 +11,6 @@ export default class TaskBox extends HTMLElement {
     }
 
 
-
-
-
     _createLink() {
         const link = document.createElement('link');
 
@@ -53,7 +50,6 @@ export default class TaskBox extends HTMLElement {
 
     show() {
 
-
         document.querySelector("#modal-container").style.zIndex = "1";
         document.querySelector("#modal").style.display = "block";
         document.querySelector("#parent").style.backgroundColor =
@@ -79,9 +75,33 @@ export default class TaskBox extends HTMLElement {
     }
 
 
+    newtaskCallback(callback) {
+
+        if (typeof callback == "function") {
+
+            const btn = document.querySelector("#add");
+
+            btn.addEventListener("click", () => {
+                const title = document.querySelector("#title").value;
+                const status = document.querySelector("#status").value;
+
+                const task = {
+                    title: title,
+                    status: status
+                }
+
+                document.querySelector("#modal-container").style.zIndex = "-1";
+                document.querySelector('#modal').style.display = 'none';
+                document.querySelector('#parent').style.backgroundColor =
+                    'rgb(255, 255, 255)';
+
+                callback(task);
 
 
+            });
 
+        }
+    }
 
 
 }//Slutt class

@@ -1,56 +1,6 @@
-import TaskList from "../task-list/main.js";
-customElements.define('task-list', TaskList);
-
-import TaskBox from "../task-box/main.js";
-customElements.define('task-box', TaskBox);
 
 
-const tasklist = document.querySelector("task-list");
-const taskbox = document.querySelector("task-box");
-
-
-loadTask();
-
-tasklist.enableaddtask();
-
-
-tasklist.addtaskCallback(() => taskbox.show());
-
-
-tasklist.changestatusCallback(
-    (id, newStatus) => {
-        console.log(`User chose ${newStatus} for task ${id}`);
-        updateTask(id, newStatus);
-    }
-);
-
-
-tasklist.deletetaskCallback(
-    (id) => {
-
-        console.log(`Click event on delete button of task ${id}`);
-        removeTask(id);
-    }
-);
-
-
-tasklist.noTask();
-
-
-taskbox.close();
-
-
-taskbox.newtaskCallback((task) => {
-    console.log(`New task '${task.title}' with initial status ${task.status} is added by the user.`);
-    addTask(task);
-
-});
-
-
-/***********************************************Gui-Handler***********************************************/
-
-
-async function loadTask() {
+export async function loadTask() {
 
     const resTasks = await fetch("http://localhost:8080/TaskServices/api/services/tasklist");
     // const res = await fetch("/TaskService/broker/tasklist",{ "headers": { "Content-Type": "application/json; charset=utf-8" } });
@@ -73,7 +23,9 @@ async function loadTask() {
 }
 
 
-async function addTask(task) {
+
+
+export async function addTask(task) {
 
     const requestSettings = {
         "method": "POST",
@@ -122,7 +74,7 @@ async function addTask(task) {
 }//Slutt addTask
 
 
-async function removeTask(id) {
+export async function removeTask(id) {
 
     try {
 
@@ -143,12 +95,12 @@ async function removeTask(id) {
 }//Slutt removeTask
 
 
-async function updateTask(id, status) {
+export async function updateTask(id, status) {
 
     const requestSettings = {
         "method": "PUT",
         "headers": { "Content-Type": "application/json; charset=utf-8" },
-        "body": JSON.stringify({ "status": status }),
+        "body": JSON.stringify({ "staus": status }),
         "cache": "no-cache",
         "redirect": "error"
     };
@@ -172,13 +124,4 @@ async function updateTask(id, status) {
     } catch (e) {
         console.log("Error  " + e);
     }
-}//Slutt updateTask
-
-
-
-
-
-
-
-
-
+}
