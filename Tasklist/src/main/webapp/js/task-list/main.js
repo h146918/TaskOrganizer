@@ -1,6 +1,9 @@
 export default class TaskList extends HTMLElement {
 
-
+    /**
+     * Creates the shadow dom, link tag and the html starter code
+     * @constructor
+     */
     constructor() {
 
         super();
@@ -11,6 +14,11 @@ export default class TaskList extends HTMLElement {
 
     }//Slutt constructor
 
+
+    /**
+     * Creates link tag and append it to the shadow dom
+     * @private
+     */
     _createLink() {
         const link = document.createElement('link');
 
@@ -23,6 +31,10 @@ export default class TaskList extends HTMLElement {
     }//Slutt createLink
 
 
+    /**
+     * Creates a root element with starting html code and append it to the shadow dom
+     * @private
+     */
     _createHTML() {
 
         const root = document.createElement("div");
@@ -40,11 +52,17 @@ export default class TaskList extends HTMLElement {
     }//Slutt createHTML
 
 
+    /**
+     * Creates the html table and inserts tasks if they exsist in the database
+     * @private
+     * @param { Object } tasks - Object with tasks
+     * @param { Object } status - Object with status
+     * 
+     */
     _createTasks(tasks, status) {
 
 
         try {
-            
             const root = this._shadow.getElementById("root");
 
             const table = document.createElement("table");
@@ -79,13 +97,16 @@ export default class TaskList extends HTMLElement {
             console.log("Fetched data");
 
         } catch (e) {
-            console.log("Error: " + e);
+            console.log("Error _createTasks: " + e);
         }
 
     }//Slutt loadTask
 
-   
 
+    /**
+     * Enables the New task button
+     * @public
+     */
     enableaddtask() {
 
         try {
@@ -105,7 +126,7 @@ export default class TaskList extends HTMLElement {
 
 
         } catch (e) {
-            console.log("Error: " + e);
+            console.log("Error enableaddtask: " + e);
         }
 
 
@@ -114,6 +135,11 @@ export default class TaskList extends HTMLElement {
     }//Slutt enableaddtask
 
 
+    /**
+     * Adds a callback on the New task button - click event
+     * @public
+     * @param { function } callback - callback sent from the form-controller
+     */
     addtaskCallback(callback) {
 
         try {
@@ -133,13 +159,19 @@ export default class TaskList extends HTMLElement {
             }
 
         } catch (e) {
-            console.log("Error: " + e);
+            console.log("Error addtaskCallback: " + e);
         }
 
 
 
     }//Slutt addtaskCallback
 
+
+    /**
+     * Adds a callback on tasks - change event
+     * @public
+     * @param { function } callback - callback sent from the form-controller
+     */
     changestatusCallback(callback) {
 
         try {
@@ -147,7 +179,9 @@ export default class TaskList extends HTMLElement {
 
             if (connected != null && typeof callback == "function") {
 
+
                 const tasks = this._shadow.querySelectorAll(".tasks");
+
 
                 for (let task of tasks) {
 
@@ -171,11 +205,17 @@ export default class TaskList extends HTMLElement {
             }
 
         } catch (e) {
-            console.log("Error: " + e);
+            console.log("Error changestatusCallback: " + e);
         }
 
     }//Slutt changestatusCallback
 
+
+    /**
+     * Adds a callback on remove button - click event
+     * @public
+     * @param { function } callback - callback sent from the form-controller
+     */
     deletetaskCallback(callback) {
 
         try {
@@ -183,7 +223,6 @@ export default class TaskList extends HTMLElement {
             const connected = this._shadow.querySelector("#task-list");
 
             if (connected != null && typeof callback == "function") {
-
                 const tasks = this._shadow.querySelectorAll(".tasks");
                 for (let task of tasks) {
                     const btn = task.querySelector(".btn-remove");
@@ -194,10 +233,14 @@ export default class TaskList extends HTMLElement {
                         const text = task.firstElementChild.textContent;
 
                         if (window.confirm(`Delete task '${text}'`)) {
+
                             callback(id);
+
                         };
 
                     });
+
+
                 }
 
             } else {
@@ -206,12 +249,16 @@ export default class TaskList extends HTMLElement {
                 }, 100);
             }
         } catch (e) {
-            console.log("Error: " + e);
+            console.log("Error deletetaskCallback: " + e);
         }
 
     }//Slutt deletetaskCallback
 
 
+    /**
+     * Show message when there are no tasks
+     * @public
+     */
     noTask() {
 
         try {
@@ -232,14 +279,22 @@ export default class TaskList extends HTMLElement {
                 }, 100);
             }
         } catch (e) {
-            console.log("Error: " + e);
+            console.log("Error noTask: " + e);
         }
 
     }//Slutt noTask
 
-    showTask(task) { //Oppdater for knapper
+
+    /**
+     * Adds a new task and updates number of tasks
+     * @public
+     * @param { Object } task - Object with new task
+     * @param { Object } status - Object with status
+     */
+    showTask(task, status) {
 
         try {
+
             const tasks = this._shadow.querySelector("#task-list");
 
             if (tasks != null) {
@@ -250,15 +305,20 @@ export default class TaskList extends HTMLElement {
                           <td>${task.status}</td>
                           <td><select>
                           <option selected="selected">Modify</option>
-                          <option value="ACTIVE">ACTIVE</option>
-                          <option value="WAITING">WAITING</option>
-                          <option value="DONE">DONE</option>
+                          <option value=${status[0]}>${status[0]}</option>
+                          <option value=${status[1]}>${status[1]}</option>
+                          <option value=${status[2]}>${status[2]}</option>
                           </select></td>
                           <td><button class="btn-remove">Remove</button></td>
                           </tr>` ;
 
-                tasks.firstElementChild.firstElementChild.insertAdjacentHTML('afterend', content);
+                tasks.firstElementChild.firstElementChild.insertAdjacentHTML("afterend", content);
 
+                const statusMsg = this._shadow.querySelector("#status");
+                const taskNum = this._shadow.querySelectorAll(".tasks")
+                statusMsg.innerHTML = `Found ${taskNum.length} tasks.`;
+
+                location.reload();
 
             } else {
 
@@ -268,13 +328,17 @@ export default class TaskList extends HTMLElement {
 
             }
         } catch (e) {
-            console.log("Error: " + e);
+            console.log("Error showTask: " + e);
         }
 
     }//Slutt showTask
 
 
-
+    /**
+     * Updates a task
+     * @public
+     * @param { Object } update - Object with task update
+     */
     updateTask(update) {
 
         try {
@@ -291,11 +355,16 @@ export default class TaskList extends HTMLElement {
             }
 
         } catch (e) {
-            console.log("Error: " + e);
+            console.log("Error updateTask: " + e);
         }
     }//Slutt updateTask
 
 
+     /**
+     * Removes a task
+     * @public
+     * @param { Integer } id - Id of task
+     */
     removeTask(id) {
 
         try {
@@ -304,6 +373,11 @@ export default class TaskList extends HTMLElement {
             if (connected != null) {
 
                 this._shadow.getElementById(id).remove();
+
+
+                const status = this._shadow.querySelector("#status");
+                const taskNum = this._shadow.querySelectorAll(".tasks")
+                status.innerHTML = `Found ${taskNum.length} tasks.`;
             } else {
                 setTimeout(() => {
                     this.removeTask(id);
@@ -311,7 +385,7 @@ export default class TaskList extends HTMLElement {
             }
 
         } catch (e) {
-            console.log("Error: " + e);
+            console.log("Error removeTask: " + e);
         }
     }//Slutt removeTask
 

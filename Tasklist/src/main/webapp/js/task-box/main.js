@@ -1,28 +1,23 @@
 export default class TaskBox extends HTMLElement {
 
 
+     /**
+     * Creates the shadow dom and the html starter code
+     * @constructor
+     */
     constructor() {
 
         super();
         this._shadow = this.attachShadow({ mode: 'closed' });
-        this._createLink();
         this._createHTML();
 
     }
 
 
-    _createLink() {
-        const link = document.createElement('link');
-
-        const path = import.meta.url.match(/.*\//)[0];
-        link.href = path.concat("style.css");
-        link.rel = "stylesheet";
-        link.type = "text/css";
-        this._shadow.appendChild(link);
-
-    }//Slutt createLink
-
-
+    /**
+     * Creates a modal and append it to parent element
+     * @private
+     */
     _createHTML() {
         const parent = document.querySelector("#parent");
         const root = document.createElement("div");
@@ -48,18 +43,26 @@ export default class TaskBox extends HTMLElement {
     }//Slutt createHTML
 
 
+    /**
+     * Show the modal
+     * @public
+     */
     show() {
 
         document.querySelector("#modal-container").style.zIndex = "1";
         document.querySelector("#modal").style.display = "block";
         document.querySelector("#parent").style.backgroundColor =
             "rgba(220, 220, 220, 0.8)";
+
         console.log("Clicked open");
 
     }//Slutt show
 
 
-
+    /**
+     * Close the modal
+     * @public
+     */
     close() {
 
         document.querySelector('#close').addEventListener('click', () => {
@@ -68,13 +71,17 @@ export default class TaskBox extends HTMLElement {
             document.querySelector('#parent').style.backgroundColor =
                 'rgb(255, 255, 255)';
 
-
             console.log('Clicked closed');
         });
 
     }
 
 
+     /**
+     * Adds a callback on the Add task button - click event
+     * @public
+     * @param { function } callback - callback sent from the form-controller
+     */
     newtaskCallback(callback) {
 
         if (typeof callback == "function") {

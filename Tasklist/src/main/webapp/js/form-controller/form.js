@@ -1,6 +1,7 @@
 import TaskList from "../task-list/main.js";
 customElements.define('task-list', TaskList);
 
+
 import TaskBox from "../task-box/main.js";
 customElements.define('task-box', TaskBox);
 
@@ -13,9 +14,7 @@ loadTask();
 
 tasklist.enableaddtask();
 
-
 tasklist.addtaskCallback(() => taskbox.show());
-
 
 tasklist.changestatusCallback(
     (id, newStatus) => {
@@ -23,7 +22,6 @@ tasklist.changestatusCallback(
         updateTask(id, newStatus);
     }
 );
-
 
 tasklist.deletetaskCallback(
     (id) => {
@@ -33,12 +31,7 @@ tasklist.deletetaskCallback(
     }
 );
 
-
-tasklist.noTask();
-
-
 taskbox.close();
-
 
 taskbox.newtaskCallback((task) => {
     console.log(`New task '${task.title}' with initial status ${task.status} is added by the user.`);
@@ -46,15 +39,18 @@ taskbox.newtaskCallback((task) => {
 
 });
 
+tasklist.noTask();
 
-/***********************************************Gui-Handler***********************************************/
 
+/********************************************************************************************************************************************/
 
+/**
+ * GET request: Gets all tasks and status from the database
+ */
 async function loadTask() {
 
-    const resTasks = await fetch("http://localhost:8080/TaskServices/api/services/tasklist");
-    // const res = await fetch("/TaskService/broker/tasklist",{ "headers": { "Content-Type": "application/json; charset=utf-8" } });
-    const resStatus = await fetch("http://localhost:8080/TaskServices/api/services/allstatuses");
+    const resTasks = await fetch("/TaskServices/api/services/tasklist");
+    const resStatus = await fetch("/TaskServices/api/services/allstatuses");
 
 
     if (resTasks.ok && resStatus.ok) {
@@ -66,13 +62,16 @@ async function loadTask() {
         const statusObj = JSON.parse(statusRes);
         const status = statusObj.allstatuses;
 
-
         tasklist._createTasks(tasks, status);
+
     }
 
 }
 
-
+/**
+ * POST request: Adds a new task to the database
+ * @param { Object } task 
+ */
 async function addTask(task) {
 
     const requestSettings = {
@@ -87,41 +86,33 @@ async function addTask(task) {
         if (task.title != "" && task.status != "") {
 
             //const response = await fetch("/TaskService/broker/task", requestSettings);
-            const res = await fetch("/TaskServices/api/services/task", requestSettings);
-            if (res.ok) {
-                const taskRes = await res.text();
+            const resTask = await fetch("/TaskServices/api/services/task", requestSettings);
+            const resStatus = await fetch("/TaskServices/api/services/allstatuses");
+
+            if (resTask.ok && resStatus.ok) {
+                const taskRes = await resTask.text();
                 const taskObj = JSON.parse(taskRes);
                 const task = taskObj.task;
-                if (taskObj.responseStatus) {
-                    tasklist.showTask(task);
 
-                    tasklist.changestatusCallback(
-                        (id, newStatus) => {
-                            console.log(`User chose ${newStatus} for task ${id}`);
-                            updateTask(id, newStatus);
-                        }
-                    );
+                const statusRes = await resStatus.text();
+                const statusObj = JSON.parse(statusRes);
+                const status = statusObj.allstatuses;
 
-
-                    tasklist.deletetaskCallback(
-                        (id) => {
-
-                            console.log(`Click event on delete button of task ${id}`);
-                            removeTask(id);
-                        }
-                    );
-
-
+                if (taskObj.responseStatus && statusObj.responseStatus) {
+                    tasklist.showTask(task, status);
                 }
             }
-
         }
     } catch (e) {
-        console.log("Error  " + e);
+        console.log("Error addTask: " + e);
     }
 }//Slutt addTask
 
 
+/**
+ * DELETE request: Delete a task from the database
+ * @param { Integer } id 
+ */
 async function removeTask(id) {
 
     try {
@@ -133,16 +124,20 @@ async function removeTask(id) {
             if (taskObj.responseStatus) {
                 tasklist.removeTask(id);
                 console.log("Deleted from server");
+                tasklist.noTask();
             }
         }
-
-
     } catch (e) {
-        console.log("Error  " + e);
+        console.log("Error removeTask: " + e);
     }
 }//Slutt removeTask
 
 
+/**
+ * PUT request: Updates a task in the database
+ * @param { Integer } id 
+ * @param { String } status - new status
+ */
 async function updateTask(id, status) {
 
     const requestSettings = {
@@ -158,19 +153,18 @@ async function updateTask(id, status) {
         const res = await fetch(`/TaskServices/api/services/task/${id}`, requestSettings);
         if (res.ok) {
 
-            console.log("res: " + res);
             const taskRes = await res.text();
             const taskObj = JSON.parse(taskRes);
-            const task = taskObj.task;
+            const task = taskObj;
+
             if (taskObj.responseStatus) {
-                tasklist.showTask(task);
+                tasklist.updateTask(task);
                 console.log("Updated on server");
             }
         }
 
-
     } catch (e) {
-        console.log("Error  " + e);
+        console.log("Error updateTask: " + e);
     }
 }//Slutt updateTask
 
